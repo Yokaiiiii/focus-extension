@@ -1,131 +1,187 @@
-/**********************************************************************
- * YouTube Cinema Focus - content.js
- *
- * This file runs directly inside youtube.com pages.
- * It controls turning Focus Mode ON and OFF.
- *
- * How it works:
- * - When Focus Mode is enabled → we inject a <style> tag.
- * - That style hides everything on the page.
- * - Then we re-enable visibility only for the <video> element.
- * - When disabled → we remove that <style> tag.
- **********************************************************************/
+/**
+ * YouTube Cinema Focus – content.js
+ * Automatically activates cinema-style Focus Mode when Theater Mode is detected.
+ */
 
-// This variable stores whether focus mode is currently enabled
-let focusEnabled = false;
+(() => {
+    const FOCUS_CLASS = 'ycf-focus-mode';
+    const STYLE_ID = 'ycf-styles';
 
-
-/**********************************************************************
- * FUNCTION: enableFocusMode()
- *
- * This function injects CSS into the page to hide everything
- * except the actual <video> element.
- **********************************************************************/
-function enableFocusMode() {
-
-    // Safety check:
-    // If we already injected the style before,
-    // don't inject it again (prevents duplicates).
-    if (document.getElementById("yt-focus-style")) return;
-
-    // Create a new <style> element
-    const style = document.createElement("style");
-
-    // Give it an ID so we can find/remove it later
-    style.id = "yt-focus-style";
-
-    // Add CSS rules as text
-    style.textContent = `
-        /* Hide everything */
-        body * {
-            visibility: hidden !important;
-        }
-
-        /* Video player itself */
-        #movie_player, #movie_player * {
-            visibility: visible !important;
-        }
-
-        /* YouTube playback controls */
-        .ytp-chrome-bottom, 
-        .ytp-chrome-top, 
-        .ytp-chrome-controls,
-        .ytp-chrome-bottom * {
-            visibility: visible !important;
-        }
-
-        /* Ensure video is above all */
-        #movie_player {
-            position: relative !important;
-            z-index: 9999 !important;
-        }
-
-        /* Black background for everything else */
-        body {
-            background: black !important;
-        }
-    `;
-
-    // Append this style to the <head> of the page
-    document.head.appendChild(style);
-}
-
-
-/**********************************************************************
- * FUNCTION: disableFocusMode()
- *
- * This removes the injected style tag,
- * restoring YouTube to normal.
- **********************************************************************/
-function disableFocusMode() {
-
-    // Find our injected style element
-    const style = document.getElementById("yt-focus-style");
-
-    // If it exists → remove it
-    if (style) {
-        style.remove();
+    // ─── CSS injected into the page ─────────────────────────────────────────────
+    const CSS = `
+    /* ── Base reset ─────────────────────────────────────────────── */
+    body.${FOCUS_CLASS},
+    body.${FOCUS_CLASS} #page-manager,
+    body.${FOCUS_CLASS} ytd-app {
+      background: #000 !important;
     }
-}
 
+    /* ── Hide everything at the masthead / header level ─────────── */
+    body.${FOCUS_CLASS} #masthead-container,
+    body.${FOCUS_CLASS} ytd-masthead {
+      opacity: 0 !important;
+      pointer-events: none !important;
+    }
 
-/**********************************************************************
- * LISTENER: Listen for messages from popup.js
- *
- * When you click the extension toggle,
- * popup.js sends a message here.
- **********************************************************************/
-chrome.runtime.onMessage.addListener((message) => {
+    /* ── Hide sidebar / secondary panel ─────────────────────────── */
+    body.${FOCUS_CLASS} #secondary,
+    body.${FOCUS_CLASS} #secondary-inner,
+    body.${FOCUS_CLASS} ytd-watch-next-secondary-results-renderer {
+      display: none !important;
+    }
 
-    // We only react to our specific message type
-    if (message.type === "TOGGLE_FOCUS") {
+    /* ── Hide comments ───────────────────────────────────────────── */
+    body.${FOCUS_CLASS} #comments,
+    body.${FOCUS_CLASS} ytd-comments {
+      display: none !important;
+    }
 
-        // Update our internal state
-        focusEnabled = message.enabled;
+    /* ── Hide below-player metadata (description, chapters, etc.) ── */
+    body.${FOCUS_CLASS} #below,
+    body.${FOCUS_CLASS} ytd-watch-metadata,
+    body.${FOCUS_CLASS} #meta-contents,
+    body.${FOCUS_CLASS} #description,
+    body.${FOCUS_CLASS} ytd-expander,
+    body.${FOCUS_CLASS} #actions,
+    body.${FOCUS_CLASS} ytd-video-primary-info-renderer,
+    body.${FOCUS_CLASS} ytd-video-secondary-info-renderer {
+      display: none !important;
+    }
 
-        // Turn focus mode on or off
-        if (focusEnabled) {
-            enableFocusMode();
+    /* ── Hide end-screen recommendations ────────────────────────── */
+    body.${FOCUS_CLASS} .ytp-ce-element,
+    body.${FOCUS_CLASS} .ytp-endscreen-content {
+      display: none !important;
+    }
+
+    /* ── Keep the primary content column filling the viewport ────── */
+    body.${FOCUS_CLASS} #primary,
+    body.${FOCUS_CLASS} #primary-inner {
+      max-width: 100% !important;
+      width: 100% !important;
+      padding: 0 !important;
+      margin: 0 !important;
+    }
+
+    /* ── Make the player container fill the space ───────────────── */
+    body.${FOCUS_CLASS} #player-theater-container,
+    body.${FOCUS_CLASS} #ytd-player,
+    body.${FOCUS_CLASS} ytd-player {
+      width: 100% !important;
+      max-width: 100% !important;
+      background: #000 !important;
+    }
+
+    /* ── Ensure the video itself is fully visible ───────────────── */
+    body.${FOCUS_CLASS} video {
+      display: block !important;
+      visibility: visible !important;
+      opacity: 1 !important;
+    }
+
+    /* ── Smooth transition when toggling ────────────────────────── */
+    body {
+      transition: background 0.25s ease;
+    }
+  `;
+
+    // ─── Inject styles once ──────────────────────────────────────────────────────
+    function injectStyles() {
+        if (document.getElementById(STYLE_ID)) return;
+        const style = document.createElement('style');
+        style.id = STYLE_ID;
+        style.textContent = CSS;
+        document.head.appendChild(style);
+    }
+
+    // ─── Theater Mode detection ──────────────────────────────────────────────────
+    /**
+     * YouTube marks theater mode on <ytd-watch-flexy> via the
+     * `theater` boolean attribute. We watch that element for changes.
+     */
+    function isTheaterMode() {
+        const flexy = document.querySelector('ytd-watch-flexy');
+        return flexy ? flexy.hasAttribute('theater') : false;
+    }
+
+    function applyFocusMode(active) {
+        document.body.classList.toggle(FOCUS_CLASS, active);
+    }
+
+    function syncFocusMode() {
+        applyFocusMode(isTheaterMode());
+    }
+
+    // ─── Watch the player element for attribute changes ──────────────────────────
+    let playerObserver = null;
+
+    function attachPlayerObserver() {
+        const flexy = document.querySelector('ytd-watch-flexy');
+        if (!flexy || playerObserver) return;
+
+        playerObserver = new MutationObserver(syncFocusMode);
+        playerObserver.observe(flexy, { attributes: true, attributeFilter: ['theater', 'default-layout'] });
+        syncFocusMode(); // run once immediately
+    }
+
+    // ─── Handle YouTube SPA navigation ──────────────────────────────────────────
+    /**
+     * YouTube is a SPA; it doesn't do full page reloads between videos.
+     * We watch the document body for DOM changes that signal a new page
+     * has been rendered, then re-attach the player observer.
+     */
+    let spaObserver = null;
+
+    function attachSPAObserver() {
+        if (spaObserver) return;
+
+        spaObserver = new MutationObserver(() => {
+            // Re-attach player observer whenever the DOM mutates substantially
+            if (!document.querySelector('ytd-watch-flexy') || playerObserver) return;
+            // ytd-watch-flexy just appeared – wire it up
+            attachPlayerObserver();
+        });
+
+        spaObserver.observe(document.body, { childList: true, subtree: false });
+    }
+
+    // ─── Cleanup when navigating away from a watch page ─────────────────────────
+    function handleNavigation() {
+        const onWatchPage = location.pathname.startsWith('/watch');
+
+        if (!onWatchPage) {
+            // Left the video page – ensure focus mode is off
+            applyFocusMode(false);
+            if (playerObserver) {
+                playerObserver.disconnect();
+                playerObserver = null;
+            }
         } else {
-            disableFocusMode();
+            // Arrived (or returned) to a watch page
+            attachPlayerObserver();
         }
     }
-});
 
+    // YouTube fires a custom "yt-navigate-finish" event after SPA navigation
+    window.addEventListener('yt-navigate-finish', () => {
+        // Reset player observer so it can re-attach to the new page's element
+        if (playerObserver) {
+            playerObserver.disconnect();
+            playerObserver = null;
+        }
+        handleNavigation();
+    });
 
-/**********************************************************************
- * ON PAGE LOAD:
- * Check if focus mode was previously enabled.
- *
- * chrome.storage.sync stores data across sessions.
- **********************************************************************/
-chrome.storage.sync.get(["focusEnabled"], (result) => {
-
-    // If nothing stored yet → default to false
-    focusEnabled = result.focusEnabled || false;
-
-    // If it was enabled before → re-enable it
-    if (focusEnabled) {
-        enableFocusMode();
+    // ─── Bootstrap ───────────────────────────────────────────────────────────────
+    function init() {
+        injectStyles();
+        attachSPAObserver();
+        handleNavigation();
     }
-});
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', init);
+    } else {
+        init();
+    }
+})();

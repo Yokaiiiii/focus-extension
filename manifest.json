@@ -1,21 +1,12 @@
 {
     "manifest_version": 3,
     "name": "YouTube Cinema Focus",
-    "version": "0.1",
-    "description": "Cinema-style blackout mode for YouTube. Only the video remains visible.",
-    "permissions": [
-        "storage"
-    ],
-    "host_permissions": [
-        "https://www.youtube.com/*"
-    ],
-    "action": {
-        "default_popup": "popup.html"
-    },
+    "version": "1.0.0",
+    "description": "Automatically enables a cinema-style Focus Mode when switching to YouTube Theater Mode.",
     "content_scripts": [
         {
             "matches": [
-                "https://www.youtube.com/*"
+                "*://www.youtube.com/*"
             ],
             "js": [
                 "content.js"
