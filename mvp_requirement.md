@@ -1,77 +1,44 @@
-## YouTube Focus Mode – MVP Requirements
+## YouTube Cinema Focus – MVP Requirements (Theater Mode Only)
 
 ### 1. Project Goal
-
-Build a browser extension that enables a manual “Focus Mode” on YouTube.
-
-When activated, the page should simulate a cinema-style blackout where only the video content remains visible and all other UI elements are hidden or blacked out.
+Build a browser extension that automatically enables a cinema-style Focus Mode **only when the user switches to YouTube’s Theater Mode**.  
+When activated, the page should appear black except for the video player and playback controls.
 
 ---
 
 ### 2. Target Platform
-
-* Chromium-based browsers
-* Tested on Vivaldi
-* Manifest Version 3
+- Chromium-based browsers (tested on Vivaldi)
+- Manifest Version 3
 
 ---
 
 ### 3. Functional Requirements
 
-#### 3.1 Toggle Control
+#### 3.1 Automatic Activation
+- Detect when user switches to **Theater Mode**.
+- Enable Focus Mode automatically.
+- Disable Focus Mode when leaving Theater Mode (back to default mode).
 
-* Extension must provide a manual ON/OFF toggle.
-* Toggle state must persist across page reloads.
-* Toggle state must persist across browser sessions.
-
----
-
-#### 3.2 Focus Mode Behavior (When ON)
-
-Across all pages on youtube.com:
-
-* Entire page background must appear black.
-* All UI elements must be hidden or visually removed.
-* Only the video player element must remain visible.
-* Playback controls must remain functional.
-* End-screen recommendations must not be visible.
-
----
-
-#### 3.3 When OFF
-
-* YouTube must behave normally.
-* No styling or DOM changes should persist.
+#### 3.2 Focus Mode Behavior (Theater Mode)
+- Entire page background black.
+- All UI elements hidden (sidebar, header, comments, suggested videos, etc.).
+- Video player and playback controls fully visible and usable.
+- End-screen recommendations hidden.
 
 ---
 
 ### 4. Non-Functional Requirements
-
-* No backend.
-* No external libraries.
-* Minimal performance overhead.
-* Must handle YouTube SPA navigation.
-* Clean, minimal code structure.
+- No popup or manual toggle required.
+- No backend.
+- Minimal performance overhead.
+- Must handle YouTube SPA navigation (clicking between videos without page reload).
+- Clean and maintainable code.
 
 ---
 
 ### 5. Out of Scope (Future Versions)
-
-* Timer / Pomodoro mode
-* Channel whitelist
-* Scheduled activation
-* Analytics tracking
-* Productivity statistics
-
----
-
-# 📌 One More Suggestion
-
-Add a section:
-
-### 6. Version
-
-MVP Version: 0.1
-Date: 4th March 
-
----
+- Manual toggle button.
+- Timer / Pomodoro mode.
+- Full-screen behavior changes.
+- Analytics tracking or statistics.
+- Whitelist of channels.
