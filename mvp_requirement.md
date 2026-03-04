@@ -1,44 +1,66 @@
-## YouTube Cinema Focus – MVP Requirements (Theater Mode Only)
+# YouTube Cinema Focus — MVP Requirements
 
-### 1. Project Goal
-Build a browser extension that automatically enables a cinema-style Focus Mode **only when the user switches to YouTube’s Theater Mode**.  
-When activated, the page should appear black except for the video player and playback controls.
+**Version:** 1.0.0  
+**Target:** Chromium-based browsers (MV3)  
+**Scope:** Theater Mode only
 
 ---
 
-### 2. Target Platform
-- Chromium-based browsers (tested on Vivaldi)
+## Goal
+
+A lightweight browser extension that automatically activates a cinema-style **Focus Mode** whenever the user enters YouTube's Theater Mode. No popups, no manual toggles — it just works.
+
+When active, the page goes dark and everything disappears except the video player and its controls.
+
+---
+
+## Target Platform
+
+- Chromium-based browsers (Chrome, Vivaldi, Edge, Brave)
 - Manifest Version 3
+- No backend required
 
 ---
 
-### 3. Functional Requirements
+## Functional Requirements
 
-#### 3.1 Automatic Activation
-- Detect when user switches to **Theater Mode**.
-- Enable Focus Mode automatically.
-- Disable Focus Mode when leaving Theater Mode (back to default mode).
+### Auto-Activation
+- Detect when the user switches to **Theater Mode**
+- Enable Focus Mode automatically on activation
+- Disable Focus Mode automatically when leaving Theater Mode
+- Handle YouTube's SPA navigation (no full page reloads between videos)
 
-#### 3.2 Focus Mode Behavior (Theater Mode)
-- Entire page background black.
-- All UI elements hidden (sidebar, header, comments, suggested videos, etc.).
-- Video player and playback controls fully visible and usable.
-- End-screen recommendations hidden.
+### Focus Mode Behavior
+When active, the following must be true:
+
+| Element | Behavior |
+|---|---|
+| Page background | Black |
+| Header / masthead | Hidden |
+| Sidebar / suggested videos | Hidden |
+| Comments section | Hidden |
+| Video description & metadata | Hidden |
+| End-screen recommendations | Hidden |
+| Video player | Fully visible |
+| Playback controls | Fully visible and usable |
 
 ---
 
-### 4. Non-Functional Requirements
-- No popup or manual toggle required.
-- No backend.
-- Minimal performance overhead.
-- Must handle YouTube SPA navigation (clicking between videos without page reload).
-- Clean and maintainable code.
+## Non-Functional Requirements
+
+- No popup or manual toggle UI
+- No backend or external requests
+- Minimal DOM footprint and performance overhead
+- Clean, readable, maintainable code
+- Must survive YouTube SPA navigation between videos
 
 ---
 
-### 5. Out of Scope (Future Versions)
-- Manual toggle button.
-- Timer / Pomodoro mode.
-- Full-screen behavior changes.
-- Analytics tracking or statistics.
-- Whitelist of channels.
+## Out of Scope (Future Versions)
+
+- Manual toggle button or popup UI
+- Timer / Pomodoro mode
+- Full-screen behavior changes
+- Analytics or usage statistics
+- Per-channel whitelist
+- Firefox / Safari support
