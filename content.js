@@ -36,24 +36,31 @@ function enableFocusMode() {
 
     // Add CSS rules as text
     style.textContent = `
-        /* Hide EVERYTHING on the page */
+        /* Hide everything */
         body * {
             visibility: hidden !important;
         }
 
-        /* Make the video element visible again */
-        video,
-        video * {
+        /* Video player itself */
+        #movie_player, #movie_player * {
             visibility: visible !important;
         }
 
-        /* Ensure the video is above everything */
-        video {
+        /* YouTube playback controls */
+        .ytp-chrome-bottom, 
+        .ytp-chrome-top, 
+        .ytp-chrome-controls,
+        .ytp-chrome-bottom * {
+            visibility: visible !important;
+        }
+
+        /* Ensure video is above all */
+        #movie_player {
             position: relative !important;
             z-index: 9999 !important;
         }
 
-        /* Make entire page background black */
+        /* Black background for everything else */
         body {
             background: black !important;
         }
