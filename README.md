@@ -2,10 +2,10 @@
 
 # 🎬 YouTube Cinema Focus
 
-**Automatic cinema-style focus mode for YouTube Theater Mode.**  
-No buttons. No settings. It just works.
+**Cinema-style focus mode for YouTube Theater Mode.**  
+Enable it when you need to focus. Forget it exists when you don't.
 
-![Version](https://img.shields.io/badge/version-1.0.0-black?style=flat-square)
+![Version](https://img.shields.io/badge/version-1.1.0-black?style=flat-square)
 ![Manifest](https://img.shields.io/badge/manifest-v3-red?style=flat-square&logo=googlechrome)
 ![License](https://img.shields.io/badge/license-MIT-white?style=flat-square)
 
@@ -15,55 +15,63 @@ No buttons. No settings. It just works.
 
 ## What it does
 
-The moment you switch to **Theater Mode** on YouTube, the extension kicks in — the page goes black, every distraction disappears, and only the video remains.
+Toggle the extension on via the popup, switch YouTube to **Theater Mode**, and every distraction vanishes — header, sidebar, comments, suggestions, end-screens, all of it. Only the video remains.
 
-Switch back out of Theater Mode and everything returns to normal. Zero configuration required.
+Toggle it off when you're just browsing and YouTube works completely normally.
 
 ```
-Before  →  Header, sidebar, comments, suggestions, descriptions...
-After   →  ░░░░░░░░░░░░░  [ VIDEO ]  ░░░░░░░░░░░░░
+Focus ON  + Theater Mode  →  ░░░░░░  [ VIDEO ]  ░░░░░░
+Focus OFF + Theater Mode  →  YouTube works as usual
 ```
 
 ---
 
 ## Features
 
+- 🔘 **Popup toggle** — enable only when you need to focus, disable for casual browsing
 - ⚡ **Instant** — activates the moment Theater Mode is toggled
 - 🧹 **Clean** — hides header, sidebar, comments, end-screens, and all metadata
 - 🔁 **SPA-aware** — survives YouTube navigation without page reloads
-- 🪶 **Lightweight** — no background scripts, no permissions, no backend
-- 🔕 **Silent** — no popups, no badges, no onboarding
+- 💾 **Persistent** — remembers your on/off preference across browser restarts
+- 🪶 **Lightweight** — no background scripts, no external requests
+
+---
+
+## File structure
+
+```
+youtube-cinema-focus/
+├── manifest.json
+├── content.js
+├── popup.html
+├── popup.js
+└── icons/
+    ├── icon16.png
+    ├── icon48.png
+    └── icon128.png
+```
 
 ---
 
 ## Installation
 
-> This extension is unpacked (developer mode). It takes about 30 seconds to install.
+> This is an unpacked extension (developer mode). Takes about 30 seconds.
 
-### Step 1 — Download the extension
+### Step 1 — Keep the folder somewhere permanent
 
-Save the extension folder to somewhere permanent on your computer.  
-**Do not move or delete this folder** — Chrome references it directly.
-
-```
-youtube-cinema-focus/
-├── manifest.json
-└── content.js
-```
+Place the `youtube-cinema-focus` folder in a location you won't move or delete it from — Chrome references it directly.
 
 ### Step 2 — Open Chrome Extensions
-
-Open your browser and go to:
 
 ```
 chrome://extensions
 ```
 
-Or navigate via: **Menu → More Tools → Extensions**
+Or: **Menu → More Tools → Extensions**
 
 ### Step 3 — Enable Developer Mode
 
-In the top-right corner of the Extensions page, toggle **Developer mode** on.
+Toggle **Developer mode** on in the top-right corner of the Extensions page.
 
 ```
 ┌─────────────────────────────────────────┐
@@ -73,7 +81,7 @@ In the top-right corner of the Extensions page, toggle **Developer mode** on.
 
 ### Step 4 — Load the extension
 
-Click **"Load unpacked"** (top-left) and select the `youtube-cinema-focus` folder.
+Click **"Load unpacked"** and select the `youtube-cinema-focus` folder.
 
 ```
 [ Load unpacked ]  [ Pack extension ]  [ Update ]
@@ -81,59 +89,53 @@ Click **"Load unpacked"** (top-left) and select the `youtube-cinema-focus` folde
    click here
 ```
 
-The extension will appear in your list and is immediately active.
+The extension appears in your toolbar and is ready to use.
 
 ---
 
 ## Usage
 
-1. Go to [youtube.com](https://youtube.com) and open any video
-2. Click the **Theater Mode** button in the player controls (or press `t`)
-3. Focus Mode activates automatically — enjoy the video
-4. Press `t` again or click the button to exit and restore the full page
+1. Click the **🎬 Cinema Focus** icon in your Chrome toolbar
+2. Toggle **Focus Mode** to **Enabled**
+3. Go to YouTube, open a video, and press `t` (or click the Theater Mode button)
+4. Focus Mode activates — distractions gone
+5. Press `t` again to exit Theater Mode and restore the full page
+6. To use YouTube normally, just toggle the extension **Off** from the popup
 
 ```
-┌─────────────────────────────────────────┐
-│          ░░░░░░░░░░░░░░░░░░░░░          │
-│          ░                 ░░           │
-│          ░    ▶  VIDEO     ░░           │
-│          ░                 ░░           │
-│          ░░░░░░░░░░░░░░░░░░░░           │
-│  ▶  ──────────────────  🔊  ⛶          │
-└─────────────────────────────────────────┘
+Popup → [ Focus Mode  ●─────── ]  ← Enabled (red)
+Popup → [ Focus Mode ─────────○]  ← Disabled (grey)
 ```
 
 ---
 
-## Updating the extension
+## Updating after edits
 
-If you edit `content.js` or `manifest.json`:
+If you modify any file in the extension folder:
 
-1. Go back to `chrome://extensions`
+1. Go to `chrome://extensions`
 2. Find **YouTube Cinema Focus**
 3. Click the **refresh icon** ↺ on the extension card
-
-Changes take effect immediately on the next page load.
 
 ---
 
 ## Uninstalling
 
 1. Go to `chrome://extensions`
-2. Find **YouTube Cinema Focus**
-3. Click **Remove**
-
-You can also safely delete the folder from your computer after removing it.
+2. Find **YouTube Cinema Focus** → click **Remove**
+3. Optionally delete the folder from your computer
 
 ---
 
 ## Technical notes
 
-- Built with **Manifest V3** — no deprecated APIs
-- Uses a `MutationObserver` on `ytd-watch-flexy[theater]` for zero-polling detection
-- Listens to `yt-navigate-finish` for SPA navigation handling
-- Injects a single `<style>` tag — no external resources, no network requests
-- Requires no permissions beyond the default content script access to `youtube.com`
+- **Manifest V3** — no deprecated APIs
+- `MutationObserver` on `ytd-watch-flexy[theater]` for zero-polling theater mode detection
+- `yt-navigate-finish` event for clean SPA navigation handling
+- `chrome.storage.local` to persist the enabled/disabled state
+- `chrome.runtime.onMessage` for instant popup → content script communication
+- Single injected `<style>` tag — no network requests, no external resources
+- Permissions used: `storage` only
 
 ---
 
